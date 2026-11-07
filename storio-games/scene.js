@@ -5,6 +5,7 @@ const FRAME_INTERVAL_MS = 1000 / 30;
 const READING_STOPS = [0, 0.19, 0.54, 0.88, 1];
 const ROAD_START = -40;
 const ROAD_END = 430;
+const TREE_ASSETS = ['tree-wood', 'tree-pine-wood', 'tree-birch', 'tree-willow-wood', 'tree-palm-wood'];
 
 function roadX(distance) {
   return Math.sin(distance * 0.034) * 10 + Math.sin(distance * 0.071) * 3.2;
@@ -40,9 +41,7 @@ export function mountJourney(canvas) {
   const controllers = new Set();
   const sprites = [];
   const clouds = [];
-  const birds = [];
   const treeMaterials = [];
-  const birdMaterials = [];
   const failedAssets = [];
   const bufferSize = new THREE.Vector2();
   let sun = null;
@@ -177,7 +176,7 @@ export function mountJourney(canvas) {
 
   function updateAmbient(time) {
     for (let index = 0; index < treeMaterials.length; index += 1) {
-      treeMaterials[index].rotation = Math.sin(time * 0.8 + index * 2.1) * 0.025;
+      if (treeMaterials[index]) treeMaterials[index].rotation = Math.sin(time * 0.8 + index * 2.1) * 0.025;
     }
     for (const cloud of clouds) {
       if (cloud.skyLayer) {
@@ -192,23 +191,6 @@ export function mountJourney(canvas) {
         cloud.sprite.position.x = cloud.x + Math.sin(time * 0.13 + cloud.phase) * 1.8;
         cloud.sprite.position.y = cloud.y + Math.cos(time * 0.16 + cloud.phase) * 0.35;
       }
-    }
-    const frames = [0, 1, 2, 1];
-    for (let index = 0; index < birds.length; index += 1) {
-      const bird = birds[index];
-      const distance = 24 + index * 3.5;
-      const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * distance;
-      const across = ((time * (0.11 + index * 0.007) + index * 0.173) % 1) * 2.6 - 1.3;
-      bird.position.set(
-        halfHeight * camera.aspect * across,
-        4.2 + (index % 3) * 0.95 + Math.sin(time * 1.7 + index) * 0.35,
-        -distance,
-      );
-      camera.localToWorld(bird.position);
-      bird.material = birdMaterials[frames[Math.floor(time * 5.5 + index * 0.65) % frames.length]];
-      const height = (45 + (index % 3) * 10) * halfHeight * 2 / viewHeight;
-      const cellAspect = bird.material.map.image.width / (bird.material.map.image.height * 3);
-      bird.scale.set(height * cellAspect, height, 1);
     }
     if (sun) {
       const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 150;
@@ -344,22 +326,26 @@ export function mountJourney(canvas) {
     }
   }
 
-  const ready = Promise.all(['tree', 'cloud', 'sun', 'birds'].map(loadTexture)).then(([treeTexture, cloudTexture, sunTexture, birdTexture]) => {
+  const ready = Promise.all([...TREE_ASSETS, 'cloud', 'sun'].map(loadTexture)).then(loaded => {
     if (disposed) return { disposed: true };
-    if (treeTexture) {
-      for (let phase = 0; phase < 3; phase += 1) {
-        const material = new THREE.SpriteMaterial({ map: treeTexture, transparent: true, alphaTest: 0.035, depthWrite: false });
-        materials.add(material);
-        treeMaterials.push(material);
-      }
-      for (let index = 0; index < 60; index += 1) {
-        const distance = -16 + (index / 60) * 355 + random() * 4;
-        const nearRoad = index % 3 !== 0;
-        const offset = (index % 2 === 0 ? -1 : 1) * (nearRoad ? 5.6 + random() * 6 : 15 + random() * 15);
-        const height = nearRoad ? 6 + random() * 5.5 : 11 + random() * 8;
-        const sprite = makeSprite(`tree-${index}`, treeTexture, height, treeMaterials[index % treeMaterials.length]);
-        sprite.position.set(roadX(distance) + offset, groundHeight(distance, offset) - 0.05, -distance);
-      }
+    const treeTextures = loaded.slice(0, TREE_ASSETS.length);
+    const [cloudTexture, sunTexture] = loaded.slice(TREE_ASSETS.length);
+    for (const texture of treeTextures) {
+      const material = texture ? new THREE.SpriteMaterial({ map: texture, transparent: true, alphaTest: 0.035, depthWrite: false }) : null;
+      if (material) materials.add(material);
+      treeMaterials.push(material);
+    }
+    // Keep every third seeded position: 20 trees, balanced sides, unchanged cloud placement.
+    for (let index = 0; index < 60; index += 1) {
+      const distance = -16 + (index / 60) * 355 + random() * 4;
+      const nearRoad = Math.floor(index / 3) % 3 !== 0;
+      const offset = (index % 2 === 0 ? -1 : 1) * (nearRoad ? 5.6 + random() * 6 : 15 + random() * 15);
+      const height = nearRoad ? 6 + random() * 5.5 : 11 + random() * 8;
+      if (index % 3 !== 0) continue;
+      const species = (index / 3) % TREE_ASSETS.length;
+      if (!treeTextures[species]) continue;
+      const sprite = makeSprite(`tree-${index}`, treeTextures[species], height, treeMaterials[species]);
+      sprite.position.set(roadX(distance) + offset, groundHeight(distance, offset) - 0.05, -distance);
     }
     if (cloudTexture) {
       const material = new THREE.SpriteMaterial({ map: cloudTexture, transparent: true, alphaTest: 0.025, depthWrite: false });
@@ -393,26 +379,6 @@ export function mountJourney(canvas) {
       sun.material.fog = false;
       sun.material.depthTest = false;
       sun.renderOrder = 1;
-    }
-    if (birdTexture) {
-      // Three shared UV frames use the delivered atlas without editing pixels.
-      for (let frame = 0; frame < 3; frame += 1) {
-        const texture = birdTexture.clone();
-        texture.repeat.set(1 / 3, 1);
-        texture.offset.set(frame / 3, 0);
-        texture.needsUpdate = true;
-        textures.add(texture);
-        const material = new THREE.SpriteMaterial({ map: texture, transparent: true, alphaTest: 0.025, depthWrite: false, depthTest: false });
-        materials.add(material);
-        birdMaterials.push(material);
-      }
-      for (let index = 0; index < 7; index += 1) {
-        const sprite = makeSprite(`bird-${index}`, birdTexture, 2.2 + (index % 3) * 0.35, birdMaterials[index % 3]);
-        sprite.scale.x /= 3;
-        sprite.center.set(0.5, 0.5);
-        sprite.renderOrder = 4;
-        birds.push(sprite);
-      }
     }
     updateAmbient(ambientTime);
     drawFrame();
