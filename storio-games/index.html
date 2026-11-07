@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Storio · 구름 숲 전진 목업</title>
+    <link rel="stylesheet" href="review.css">
+  </head>
+  <body>
+    <button id="panel-toggle" class="panel-toggle" aria-controls="controls" aria-expanded="false">시안 조작</button>
+    <main class="workspace">
+      <aside id="controls" class="sidebar" data-open="false" aria-label="목업 조작">
+        <p class="kicker">STORIO · MOTION STUDY 01</p>
+        <h1>구름 숲을 따라<br>프로젝트 안으로.</h1>
+        <p class="intro">오른쪽 화면에서 스크롤하면<br>길을 따라 앞으로 이동합니다.</p>
+        <nav class="states" aria-label="장면 선택">
+          <button data-progress="0.08" aria-current="page"><span>01</span> 숲 진입</button>
+          <button data-progress="0.22"><span>02</span> 첫 프로젝트</button>
+          <button data-progress="0.37"><span>03</span> 전진 중</button>
+          <button data-progress="0.58"><span>04</span> 다음 프로젝트</button>
+          <button data-progress="0.9"><span>05</span> 마지막 장면</button>
+        </nav>
+        <div class="actions">
+          <button id="play">자동 시연 <span>▶</span></button>
+          <button id="replay">다시 재생 <span>↺</span></button>
+          <a id="full-preview" href="journey.html?p=0.08" target="_blank" rel="noopener">전체 미리보기 <span>↗</span></a>
+        </div>
+        <div class="scrubber">
+          <label for="progress">이동 위치 <output id="position">8%</output></label>
+          <input id="progress" type="range" min="0" max="1000" value="80">
+          <p id="scene-state" role="status">숲 진입</p>
+        </div>
+        <div class="notes">
+          <p>구름과 새가 움직이고,<br>언덕길을 따라 시점이 오르내립니다.</p>
+          <p>제목과 문구는 임시입니다.<br>제품에 적용하지 않은 독립 목업입니다.</p>
+          <a href="https://www.fiabamia.com/" target="_blank" rel="noopener">참고 · FiabaMia의 숲 구간 ↗</a>
+        </div>
+      </aside>
+      <section class="preview" aria-label="스크롤 전진 목업">
+        <iframe id="preview" src="journey.html?p=0.08" title="만화풍 구름 숲을 따라 전진하는 프로젝트 섹션"></iframe>
+      </section>
+    </main>
+    <script src="review.js"></script>
+  </body>
+</html>

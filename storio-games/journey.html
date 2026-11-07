@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Storio · Into the story</title>
+    <link rel="stylesheet" href="journey.css">
+  </head>
+  <body>
+    <a class="skip" href="#chapters">Skip to projects</a>
+    <div class="scene" aria-hidden="true">
+      <canvas id="world"></canvas>
+      <div class="atmosphere"></div>
+      <div class="vignette"></div>
+    </div>
+    <header class="navigation">
+      <a href="index.html" class="wordmark" aria-label="Storio Games mockup">Storio<span>GAMES</span></a>
+      <span class="nav-label">SELECTED WORLDS — 2026</span>
+      <a class="nav-end" href="#chapters">EXPLORE <span>↘</span></a>
+    </header>
+    <div class="chapter-indicator" aria-hidden="true">
+      <span>THE JOURNEY</span>
+      <div class="track"><i id="track-fill"></i></div>
+      <b id="current-number">01</b><small>03</small>
+    </div>
+    <main id="chapters">
+      <article class="chapter" data-at="0.19" id="project-1">
+        <div class="copy">
+          <p class="eyebrow">01 <i></i> A NEW BEGINNING</p>
+          <h1>Where stories<br><em>come alive.</em></h1>
+          <p class="description">A little curiosity. An unfamiliar path.<br>A world waiting to be discovered.</p>
+          <a class="project-link" href="#project-2">EXPLORE THE WORLD <span>↗</span></a>
+        </div>
+      </article>
+      <article class="chapter" data-at="0.54" id="project-2">
+        <div class="copy">
+          <p class="eyebrow">02 <i></i> FURTHER INTO THE UNKNOWN</p>
+          <h2>Beyond<br><em>the ordinary.</em></h2>
+          <p class="description">Follow the lights a little further.<br>There is always another story ahead.</p>
+          <a class="project-link" href="#project-3">EXPLORE THE WORLD <span>↗</span></a>
+        </div>
+      </article>
+      <article class="chapter" data-at="0.88" id="project-3">
+        <div class="copy">
+          <p class="eyebrow">03 <i></i> YOUR NEXT CHAPTER</p>
+          <h2>A world<br><em>of our own.</em></h2>
+          <p class="description">Small moments. Lasting feelings.<br>The journey has only just begun.</p>
+          <a class="project-link" href="#project-1">BACK TO THE BEGINNING <span>↺</span></a>
+        </div>
+      </article>
+    </main>
+    <footer class="journey-footer">
+      <span id="chapter-name">I · THE BEGINNING</span>
+      <span class="scroll-hint">SCROLL TO JOURNEY <i>↓</i></span>
+      <span>STORIES MADE PLAYABLE.</span>
+    </footer>
+    <p class="fallback" hidden>The 3D scene could not load. The project text is still available below.</p>
+    <script type="module" src="journey.js"></script>
+  </body>
+</html>
