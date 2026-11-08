@@ -182,8 +182,8 @@ export function mountJourney(canvas) {
       if (cloud.skyLayer) {
         const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * cloud.depth;
         cloud.sprite.position.set(
-          halfHeight * camera.aspect * cloud.x + Math.sin(time * 0.13 + cloud.phase) * 1.2,
-          halfHeight * cloud.y + Math.cos(time * 0.16 + cloud.phase) * 0.3,
+          halfHeight * camera.aspect * (((cloud.x + time * cloud.speed + 1.65) % 3.3) - 1.65),
+          halfHeight * (cloud.y + Math.sin(time * 0.22 + cloud.phase) * 0.018),
           -cloud.depth,
         );
         camera.localToWorld(cloud.sprite.position);
@@ -194,7 +194,12 @@ export function mountJourney(canvas) {
     }
     if (sun) {
       const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 150;
-      sun.position.set(halfHeight * camera.aspect * 0.62, halfHeight * 0.7, -150);
+      sun.position.set(
+        halfHeight * camera.aspect * (0.58 + Math.sin(time * 0.09) * 0.012),
+        halfHeight * (0.66 + Math.sin(time * 0.18) * 0.018),
+        -150,
+      );
+      sun.material.rotation = Math.sin(time * 0.12) * 0.035;
       camera.localToWorld(sun.position);
     }
   }
@@ -357,7 +362,7 @@ export function mountJourney(canvas) {
         const distance = 32 + index * 29;
         const x = roadX(distance) + (index % 2 === 0 ? -1 : 1) * (18 + random() * 25);
         const y = roadHeight(distance) + 17 + random() * 9;
-        const sprite = makeSprite(`cloud-${index}`, cloudTexture, skyLayer ? 11 + index * 2.5 : 5 + random() * 4.5, skyLayer ? skyMaterial : material);
+        const sprite = makeSprite(`cloud-${index}`, cloudTexture, skyLayer ? [8.5, 12, 7][index] : 5 + random() * 4.5, skyLayer ? skyMaterial : material);
         sprite.position.set(x, y, -distance);
         if (skyLayer) {
           sprite.center.set(0.5, 0.5);
@@ -367,14 +372,15 @@ export function mountJourney(canvas) {
           sprite,
           skyLayer,
           depth: 90 + index * 25,
-          x: skyLayer ? [-0.72, 0.1, 0.85][index] : x,
-          y: skyLayer ? [0.55, 0.82, 0.68][index] : y,
+          x: skyLayer ? [-0.88, -0.08, 1.02][index] : x,
+          y: skyLayer ? [0.62, 0.86, 0.57][index] : y,
+          speed: skyLayer ? [0.018, 0.011, 0.025][index] : 0,
           phase: random() * Math.PI * 2,
         });
       }
     }
     if (sunTexture) {
-      sun = makeSprite('sun', sunTexture, 25);
+      sun = makeSprite('sun', sunTexture, 17);
       sun.center.set(0.5, 0.5);
       sun.material.fog = false;
       sun.material.depthTest = false;
