@@ -179,28 +179,15 @@ export function mountJourney(canvas) {
       if (treeMaterials[index]) treeMaterials[index].rotation = Math.sin(time * 0.8 + index * 2.1) * 0.025;
     }
     for (const cloud of clouds) {
-      if (cloud.skyLayer) {
-        const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * cloud.depth;
-        cloud.sprite.position.set(
-          halfHeight * camera.aspect * (((cloud.x + time * cloud.speed + 1.65) % 3.3) - 1.65),
-          halfHeight * (cloud.y + Math.sin(time * 0.22 + cloud.phase) * 0.018),
-          -cloud.depth,
-        );
-        camera.localToWorld(cloud.sprite.position);
-      } else {
-        cloud.sprite.position.x = cloud.x + Math.sin(time * 0.13 + cloud.phase) * 1.8;
-        cloud.sprite.position.y = cloud.y + Math.cos(time * 0.16 + cloud.phase) * 0.35;
-      }
+      cloud.sprite.position.x = cloud.x + (cloud.skyLayer
+        ? time * cloud.speed
+        : Math.sin(time * 0.13 + cloud.phase) * 1.8);
+      cloud.sprite.position.y = cloud.y + Math.cos(time * 0.16 + cloud.phase) * 0.35;
     }
     if (sun) {
-      const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 150;
-      sun.position.set(
-        halfHeight * camera.aspect * (0.58 + Math.sin(time * 0.09) * 0.012),
-        halfHeight * (0.66 + Math.sin(time * 0.18) * 0.018),
-        -150,
-      );
+      // Sunlight belongs to the distant scene, not a camera-facing overlay.
+      sun.position.set(170 + Math.sin(time * 0.09) * 1.2, 70 + Math.sin(time * 0.18) * 1.6, -650);
       sun.material.rotation = Math.sin(time * 0.12) * 0.035;
-      camera.localToWorld(sun.position);
     }
   }
 
@@ -354,7 +341,7 @@ export function mountJourney(canvas) {
     }
     if (cloudTexture) {
       const material = new THREE.SpriteMaterial({ map: cloudTexture, transparent: true, alphaTest: 0.025, depthWrite: false });
-      const skyMaterial = new THREE.SpriteMaterial({ map: cloudTexture, transparent: true, alphaTest: 0.025, depthWrite: false, depthTest: false, fog: false });
+      const skyMaterial = new THREE.SpriteMaterial({ map: cloudTexture, transparent: true, alphaTest: 0.025, depthWrite: false, fog: false });
       materials.add(material);
       materials.add(skyMaterial);
       for (let index = 0; index < 12; index += 1) {
@@ -362,29 +349,26 @@ export function mountJourney(canvas) {
         const distance = 32 + index * 29;
         const x = roadX(distance) + (index % 2 === 0 ? -1 : 1) * (18 + random() * 25);
         const y = roadHeight(distance) + 17 + random() * 9;
-        const sprite = makeSprite(`cloud-${index}`, cloudTexture, skyLayer ? [8.5, 12, 7][index] : 5 + random() * 4.5, skyLayer ? skyMaterial : material);
+        const sprite = makeSprite(`cloud-${index}`, cloudTexture, skyLayer ? [16, 24, 28][index] : 5 + random() * 4.5, skyLayer ? skyMaterial : material);
         sprite.position.set(x, y, -distance);
         if (skyLayer) {
           sprite.center.set(0.5, 0.5);
-          sprite.renderOrder = 2;
         }
+        if (skyLayer) sprite.position.z = -[160, 300, 440][index];
         clouds.push({
           sprite,
           skyLayer,
-          depth: 90 + index * 25,
-          x: skyLayer ? [-0.88, -0.08, 1.02][index] : x,
-          y: skyLayer ? [0.62, 0.86, 0.57][index] : y,
-          speed: skyLayer ? [0.018, 0.011, 0.025][index] : 0,
+          x: skyLayer ? [-60, 25, 90][index] : x,
+          y: skyLayer ? [32, 45, 58][index] : y,
+          speed: skyLayer ? [0.8, 0.6, 0.95][index] : 0,
           phase: random() * Math.PI * 2,
         });
       }
     }
     if (sunTexture) {
-      sun = makeSprite('sun', sunTexture, 17);
+      sun = makeSprite('sun', sunTexture, 62);
       sun.center.set(0.5, 0.5);
       sun.material.fog = false;
-      sun.material.depthTest = false;
-      sun.renderOrder = 1;
     }
     updateAmbient(ambientTime);
     drawFrame();
